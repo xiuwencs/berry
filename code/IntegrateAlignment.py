@@ -23,7 +23,6 @@ def remove_len(lst):
             new_lst.append(row[2:])
         else:
             new_lst.append(row[1:])
-    # print(new_lst)  # 输出处理后的结果
     return new_lst
 def replace_sequence(lst):
     result = []
@@ -250,7 +249,7 @@ def mark_and_remove(lst):
             if lst[i][j] == '--':
                 results.append(j)
     if results == []:
-        print('The protocol does not have variable length fields!')
+        print('This protocol does not have variable-length fields!')
         return 0
     for i in range(len(lst)):
         if max(results)+2 < len(lst[i]) and lst[i][max(results)+2] == 'D-':
@@ -291,4 +290,38 @@ def mark_and_remove(lst):
             result.append(length)
     print('offset:{}'.format(min_vl))
     print('length:{}'.format(result))
-    return lst
+    return new_lst
+
+def find_equal_length_rows(data):
+    length_dict = {}
+    for row in data:
+        length = len(row)
+        if length not in length_dict:
+            length_dict[length] = [row]
+        else:
+            length_dict[length].append(row)
+    if all(len(rows) == 1 for rows in length_dict.values()):
+        result = data
+    else:
+        result = []
+        for length, rows in length_dict.items():
+            if len(rows) > 1:
+                rows.sort(key=lambda x: int(x[-1]))
+                result.append(rows[-1])
+            else:
+                result.append(rows[0])
+    return result
+def result_output(data, list):
+    if list == 0:
+        return 0
+    comparison_list = find_equal_length_rows(list)
+    for i in range(0, len(data)):
+        for j in range(0, len(data[i])):
+            data[i][j] = [[item for item in sublist if item != 'D-'][1:] for sublist in data[i][j]]
+            for row in comparison_list:
+                if len(data[i][j]) > 5 and len(data[i][j][0]) == len(row) - 3 and '/' not in data[i][j][0]:
+                    slash_positions = [index for index, value in enumerate(row) if value == '/']
+                    for k in range(0, len(data[i][j])):
+                        data[i][j][k].insert(slash_positions[0], '/')
+                        data[i][j][k].insert(slash_positions[1], '/')
+    return data

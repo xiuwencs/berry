@@ -30,8 +30,15 @@ def segment(data):
             print('This len of data do not have enough lists!')
             n += 1
             remain.append(data[i])
-    print('drop{}:'.format(n))
-    return final, remain
+
+    print('drop:{}'.format(n))
+    modified_remain = [[sublist[1:] for sublist in sublist_list] for sublist_list in remain]
+    modified_remain = threeDim_trans_2(modified_remain)
+    return final, modified_remain
+
+def threeDim_trans_2(three_dimensional_list):
+    two_dimensional_list = [row for matrix in three_dimensional_list for row in matrix]
+    return two_dimensional_list
 
 def print_num(data):
     each = []

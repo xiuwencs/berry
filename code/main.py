@@ -8,6 +8,7 @@ from AssociationAnalysis import segment
 from IntegrateAlignment import remove_len
 from IntegrateAlignment import simplify
 from IntegrateAlignment import insert_last
+from IntegrateAlignment import result_output
 from collections import defaultdict
 from Classification import header_dividing
 from Classification import check_long
@@ -27,13 +28,27 @@ def remove_duplicate(rows):
         row.append(str(duplicate_count[tuple(row)]))
     return unique_rows
 
+def print_final(four_dimensional_list, output_file_path):
+    if four_dimensional_list == 0:
+        print('输出为转换文件')
+        return 0
+    # 打开文件并写入数据
+    with open(output_file_path, 'w') as file:
+        for three_dimensional_list in four_dimensional_list:
+            for two_dimensional_list in three_dimensional_list:
+                for one_dimensional_list in two_dimensional_list:
+                    # 将每个元素连接为字符串，使用制表符分隔，然后写入文件
+                    file.write('\t'.join(one_dimensional_list) + '\n')
+
 def threeDim_trans_2(three_dimensional_list):
     two_dimensional_list = [row for matrix in three_dimensional_list for row in matrix]
     return two_dimensional_list
 
+
 if __name__ == '__main__':
     pcapng_file = input('请输入文件路径：')
     trans_file = input('请输入转换文件txt路径：')
+    output_file = input('请输入输出文件名：')
 
     # 导入文件
     import_data = import_file(pcapng_file, trans_file)
@@ -47,17 +62,14 @@ if __name__ == '__main__':
     cluster_data = check_long(cluster_data, com)
 
     # 在每个聚类中进行关联分析和数据整合
-    final_lst = []
     sequences = []
     print_result = []
     remain = []
-    num = []
     for i in range(len(cluster_data)):
         trans = []
         result = []
         re = []
         unique_matrix = []
-        unique_rows = []
         # 关联分析
         data, re = segment(cluster_data[i])
         print("segment successfully!")
@@ -73,15 +85,19 @@ if __name__ == '__main__':
 
     # 对齐
     sequences = threeDim_trans_2(sequences)
-
     print('alignment:')
     align_result = alignment(sequences)
     print_2D_list(sorted(align_result, key=len))
 
     # 标记字段位置和长度
+    remain = threeDim_trans_2(remain)
     lst = mark_and_remove(align_result)
-    remain = threeDim_trans_2(threeDim_trans_2(remain))
     print('remain:{}'.format(len(remain)))
     print_result = threeDim_trans_2(print_result)
     print('data:{}'.format(len(print_result)))
     print('total:{}'.format(len(remain) + len(print_result)))
+
+    # 输出
+    final_result = result_output(cluster_data, lst)
+    print_final(final_result, output_file)
+

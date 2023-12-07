@@ -153,7 +153,7 @@ def sup_satisfy_item(data, min_suprate):
     for k in range(0, m):
         k_apriori = []
         for j in range(0, len(dt)):
-            if dt[j][-1] >= min_suprate * n:  ##减枝过程
+            if dt[j][-1] >= min_suprate * n:  # 减枝过程
                 k_apriori.append(dt[j][0])
         dt = sup_counts(creat_connect(k_apriori, k), data)
         if len(k_apriori) != 0:
@@ -266,7 +266,7 @@ def Find_location_with_fre(Sup_satisfy_item_location, all_frequent, sup, data):
     behind_list = []
     for i in range(0, len(final_list)):
         for j in range(0, len(final_list)):
-            if final_list[i][-1] == final_list[j][-1] + 1 or final_list[j] == '00':          # notice!!!need to modify
+            if final_list[i][-1] == final_list[j][-1] + 1 or final_list[j] == '00':
                 pre_list.append(final_list[j])
     a = 0
     for i in range(0, len(final_list)):
@@ -279,13 +279,13 @@ def Find_location_with_fre(Sup_satisfy_item_location, all_frequent, sup, data):
         if a == 1:
             behind_list.append(final_list[i])
     if pre_list != []:
-        all_list = behind_list + pre_list   #important!
+        all_list = behind_list + pre_list
     else:
         all_list = final_list
         behind_list = final_list
 
     for j in range(0, len(all_list)):
-        for d in range(0, len(data)):   # row by row
+        for d in range(0, len(data)):
             t = all_list[j][-1]
             m = 0
             for q in range(0, len(list_q)):
