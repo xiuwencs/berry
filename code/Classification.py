@@ -97,6 +97,11 @@ def boundary(original_list):
     part_min = min(differences[:20])
     part_min_index = differences[:20].index(part_min)
 
+    max_r2 = None
+    min_d2 = None
+    max_r2_lst = []
+    min_d2_lst = []
+
     if len(set(differences)) > 3:
         differences.remove(max_r)
         differences.remove(min_d)
@@ -106,6 +111,12 @@ def boundary(original_list):
         index_min2 = differences.index(min_d2)
         print('max_2:{}, index_2:{}'.format(max_r2, index_max2))
         print('min_2:{}, index_2:{}'.format(min_d2, index_min2))
+
+    max_r2_lst.append(max_r2)
+    min_d2_lst.append(min_d2)
+    if None in max_r2_lst or None in min_d2_lst:
+        sudden = 15
+        return sudden, max_r2_lst, min_d2_lst
 
     if max_r > 0 and add > 0.5:
         print('There is no sudden drop point')
@@ -118,7 +129,10 @@ def boundary(original_list):
         sudden = len(original_list)
     elif -0.5 < add < 0.5:
         print('There is a sudden drop point')
-        if max_r2 + min_d2 < 0.5 and index_min2 < index_min and index_max2 < index_max and index_max2 < index_min2 and abs(min_d - min_d2) < 1.1 and abs(max_r - max_r2) < 1.1 and index_min - index_min2 < 10 :
+        if max_r2 is None:
+            sudden = 13
+        #     return sudden
+        elif max_r2 + min_d2 < 0.5 and index_min2 < index_min and index_max2 < index_max and index_max2 < index_min2 and abs(min_d - min_d2) < 1.1 and abs(max_r - max_r2) < 1.1 and index_min - index_min2 < 10 :
             sudden = index_min2 + 1
         elif max_r2 + min_d2 < 0.5 and index_max2 > index_min2 and abs(max_r - max_r2) < 1 and abs(min_d - min_d2) < 1 and abs(index_max2 - index_max) > 1 and index_min - index_min2 < 10:#snmp
             sudden = index_min2 + 2
@@ -145,13 +159,14 @@ def boundary(original_list):
     if sudden < 2:
         sudden += 12
     print('sudden:{}'.format(sudden))
-    return sudden
+    return sudden, max_r2_lst, min_d2_lst
 
 def header_dividing(cluster_data):
     entropy = []
     rise = []
     drop = []
     lst = []
+    flag = 1
     for i in range(0, len(cluster_data)):
         cluster_data[i] = len_sort(cluster_data[i])
         for j in range(0, len(cluster_data[i])):
@@ -159,13 +174,43 @@ def header_dividing(cluster_data):
                 entropies = calculate_shannon_entropy(cluster_data[i][j])
                 entropy.append(entropies)
                 print('entropies:{}'.format(entropies))
-                sudden = boundary(entropies)
+                sudden, max, min = boundary(entropies)
+                # if None in max or None in min:
+                #     flag = 0
+                #     print('flag:{}'.format(flag))
+                #     sudden = 15
+                #     return cluster_data, lst, flag, sudden
                 for k in range(0, len(cluster_data[i][j])):
                     lst.append(sudden)
                 cluster_data[i][j] = cut_pay(sudden, cluster_data[i][j])
-                for item in cluster_data[i][j]:
-                    print(item)
-    return cluster_data, lst
+                # for item in cluster_data[i][j]:
+                #     print(item)
+    return cluster_data, lst, flag, sudden
+
+def sort(data):
+    # 每个子列表的行数
+    chunk_size = 10
+    # 将二维列表分成包含每n行的子列表，形成一个三维列表
+    result = [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+    # print(result)
+    # print(len(result))
+    return result
+def divide(data, sudden):
+    # print('data')
+    # print(data)
+    # print('finish!')
+    # print(len(data))
+    # print(data[0])
+    for i in range(0, len(data)):
+        # print(len(data[i]))
+        data[i] = sort(data[i])
+        # print(len(data[i]))
+        # print('\n')
+        for j in range(0, len(data[i])):
+            for k in range(0, len(data[i][j])):
+                data[i][j][k] = data[i][j][k][:sudden]
+            # print(data[i][j])
+    return data
 
 def check_long(lst, commom):
     for i in range(0, len(lst)):
@@ -174,7 +219,7 @@ def check_long(lst, commom):
                 if len(lst[i][j][k]) >= 15:
                     lst[i][j][k] = lst[i][j][k][:commom]
                 lst[i][j][k].insert(0, str(len(lst[i][j][k])))
-                print(lst[i][j][k])
+                # print(lst[i][j][k])
     print('checking successfully!')
     return lst
 

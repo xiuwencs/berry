@@ -1,6 +1,12 @@
 from collections import Counter
 from Apriori import print_2D_list
 
+def print_all(two_dimensional_list, output_file_path):
+    # 打开文件并写入数据
+    with open(output_file_path, 'w') as file:
+        for one_dimensional_list in two_dimensional_list:
+            # 将每个元素连接为字符串，使用制表符分隔，然后写入文件
+            file.write('\t'.join(one_dimensional_list) + '\n')
 def simplify(data):
     for i in range(0, len(data)):
         for j in range(0, len(data[i])):
@@ -16,14 +22,26 @@ def insert_last(data):
             lst[i].append('D-')
     return lst
 
-def remove_len(lst):
+def remove_len(lst, flag):
     new_lst = []
     for row in lst:
         if str(row[1]).upper() == 'D-':
             new_lst.append(row[2:])
         else:
             new_lst.append(row[1:])
-    return new_lst
+    if flag == 0:
+        return lst
+    else:
+        return new_lst
+
+# def remove_len(lst):
+#     new_lst = []
+#     for row in lst:
+#         if str(row[1]).upper() == 'D-':
+#             new_lst.append(row[2:])
+#         else:
+#             new_lst.append(row[1:])
+#     return new_lst
 def replace_sequence(lst):
     result = []
     count = 0
@@ -91,8 +109,8 @@ def post_process(lst):
                     if lst[i][m] == 'D-':
                         rear.append(m)
                         break
-    print('front:{}'.format(front))
-    print('rear:{}'.format(rear))
+    # print('front:{}'.format(front))
+    # print('rear:{}'.format(rear))
     if len(set(rear)) >= 2 or len(set(front)) == 1:
 
         if rear != [] and front != []:
@@ -138,6 +156,7 @@ def check_merge(lst):
 def alignment(lst):
     lst = process(lst)
     lst = check_merge(lst)
+    print_2D_list(lst)
     for i in range(len(lst)):
         lst[i] = [elem for elem in lst[i] if elem not in ('*-')]
     longest_row = max(lst, key=len)
@@ -167,6 +186,7 @@ def alignment(lst):
                         lst[i].insert(inser, '--')
     lst.append(longest_row)
     lst = post_process(lst)
+    # print_2D_list(lst)
     return lst
 def process_list(lst):
     unique_rows = []
@@ -241,15 +261,38 @@ def remove_dashes(lst, n):
             new_lst = lst[:index] + lst_a
     return new_lst
 
-def mark_and_remove(lst):
+def unexist(lst, output_file, remain):
+    for i in range(0, len(lst)):
+        if lst[i][1] == 'D-':
+            lst[i] = lst[i][2:]
+        elif lst[i][1] != 'D-':
+            lst[i] = lst[i][1:]
+        for j in range(0, len(lst[i])):
+            if lst[i][j] == 'D-':
+                lst[i][j] = '/'
+    print_all(lst, output_file)
+    # 打开txt文件，以追加模式写入
+    with open(output_file, 'a') as file:
+        for row in remain:
+            # 将每行内容转换为字符串并写入文件，每个元素用空格分隔
+            file.write('\t'.join(row) + '\n')
+
+def mark_and_remove(lst, data, output_file, remain):
     lst = check_breakpoints(lst)
     results = []
     for i in range(len(lst)):
         for j in range(len(lst[i])):
             if lst[i][j] == '--':
                 results.append(j)
-    if results == []:
+    if results == [] or all(row.count('XX') == lst[0].count('XX') for row in lst):
+    # if results == []:
+        print(output_file)
         print('This protocol does not have variable-length fields!')
+        if results == []:
+            print('none')
+        else:
+            print('same len')
+        unexist(data, output_file, remain)
         return 0
     for i in range(len(lst)):
         if max(results)+2 < len(lst[i]) and lst[i][max(results)+2] == 'D-':
@@ -288,6 +331,10 @@ def mark_and_remove(lst):
         length = vl_new[i] - min_vl - 1
         if length > 0:
             result.append(length)
+    if result == []:
+        print(output_file)
+        print('This protocol does not have variable-length fields!')
+        return new_lst
     print('offset:{}'.format(min_vl))
     print('length:{}'.format(result))
     return new_lst

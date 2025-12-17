@@ -13,6 +13,9 @@ from collections import defaultdict
 from Classification import header_dividing
 from Classification import check_long
 from Classification import find_most_frequent
+from Classification import divide
+from bc import bc
+from fixed import fixed
 
 def remove_duplicate(rows):
     unique_rows = []
@@ -30,7 +33,7 @@ def remove_duplicate(rows):
 
 def print_final(four_dimensional_list, output_file_path):
     if four_dimensional_list == 0:
-        print('输出为转换文件')
+        # print('输出为转换文件')
         return 0
     # 打开文件并写入数据
     with open(output_file_path, 'w') as file:
@@ -44,20 +47,39 @@ def threeDim_trans_2(three_dimensional_list):
     two_dimensional_list = [row for matrix in three_dimensional_list for row in matrix]
     return two_dimensional_list
 
+def fix_field(data):
+    columns = len(data[0])
+    result = []
+    for i in range(columns):
+        column_values = [row[i] for row in data]
+        if column_values.count(column_values[0]) == len(column_values):
+            result.append(i)
+    return result
 
 if __name__ == '__main__':
     pcapng_file = input('请输入文件路径：')
     trans_file = input('请输入转换文件txt路径：')
     output_file = input('请输入输出文件名：')
+    # 例子
+    # pcapng_file = 'C:\\Users\huiying\Desktop\FLINT-main\FLINT-main\dataset\coap.pcapng'
+    # trans_file = 'coap'
+    # output_file = 'C:\\Users\huiying\Desktop\FLINT-main\FLINT-main\dataset\coap.txt'
 
     # 导入文件
     import_data = import_file(pcapng_file, trans_file)
 
     # 消息类型聚类
     cluster_data = cluster(import_data)
+    cluster_data1 = cluster_data.copy()
 
+    flag = 1
     # 切割头部和负载
-    cluster_data, lst = header_dividing(cluster_data)
+    cluster_data, lst, flag, sudden = header_dividing(cluster_data)
+    if flag == 0:
+        print('flag:0')
+        cluster_data = divide(cluster_data1, sudden)
+    else:
+        print('flag:1')
     com = find_most_frequent(lst)
     cluster_data = check_long(cluster_data, com)
 
@@ -65,6 +87,7 @@ if __name__ == '__main__':
     sequences = []
     print_result = []
     remain = []
+    all = []
     for i in range(len(cluster_data)):
         trans = []
         result = []
@@ -73,27 +96,40 @@ if __name__ == '__main__':
         # 关联分析
         data, re = segment(cluster_data[i])
         print("segment successfully!")
+
         trans = threeDim_trans_2(data)
 
+        all.append(trans)
+        print('trans{}:'.format(i))
+        if trans == []:
+            print(trans)
+        else:
+            print(trans[0])
+        print('1')
+        print('all{}:'.format(i))
+
+
         # 数据整合
-        result = remove_len(trans)
+        result = remove_len(trans, flag)
         print_result.append(insert_last(result))
         simp = simplify(insert_last(result))
         unique_matrix = remove_duplicate(simp)
         sequences.append(unique_matrix)
         remain.append(re)
 
+    all = threeDim_trans_2(all)
+
     # 对齐
     sequences = threeDim_trans_2(sequences)
-    print('alignment:')
+    print('alignment...')
     align_result = alignment(sequences)
-    print_2D_list(sorted(align_result, key=len))
 
     # 标记字段位置和长度
     remain = threeDim_trans_2(remain)
-    lst = mark_and_remove(align_result)
+    lst = mark_and_remove(align_result, all, output_file, remain)
     print('remain:{}'.format(len(remain)))
     print_result = threeDim_trans_2(print_result)
+
     print('data:{}'.format(len(print_result)))
     print('total:{}'.format(len(remain) + len(print_result)))
 
@@ -101,3 +137,5 @@ if __name__ == '__main__':
     final_result = result_output(cluster_data, lst)
     print_final(final_result, output_file)
 
+    bc(output_file)
+    fixed(output_file)

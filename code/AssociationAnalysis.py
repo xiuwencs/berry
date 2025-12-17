@@ -21,9 +21,11 @@ def segment(data):
     final = []
     remain = []
     for i in range(len(data)):
+        print('\n')
+        print('total:{}'.format(len(data[i])))
         lst = []
         if len(data[i]) > 5:
-            print('list{}:'.format(i + 1))
+            # print('list{}:'.format(i + 1))
             lst = apriori_find(data[i])
             final.append(lst)
         else:

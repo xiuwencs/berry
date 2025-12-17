@@ -42,16 +42,40 @@ def import_file(pcapng_file, output_file):
         next(reader)
         data = list(reader)
     data = Non_deal(data)
-    if pcapng_file == 'coap.pcapng' or pcapng_file == 'snmp.pcapng':
-        data = [row[44:] for row in data]
-    elif pcapng_file == 'qq.pcapng' or pcapng_file == 'stun.pcapng':
-        data = [row[42:] for row in data]
-    elif pcapng_file == 'DNS.pcapng':
-        data = [row[28:] for row in data]
-    elif pcapng_file == 'mqtt.pcapng':
-        data = [row[68:] for row in data]
-    else:
+    if output_file == 'modbus':
+        data = [row[66:] for row in data]
+    elif output_file == 'icmp':
+        data = [row[38:] for row in data]
+    elif output_file == 'smb':
+        data = [row[62:] for row in data]
+    elif output_file == 'modbus_100':
         data = [row[54:] for row in data]
+    elif output_file == 'icmp_100':
+        data = [row[38:] for row in data]
+    elif output_file == 'smb_100':
+        data = [row[62:] for row in data]
+    elif output_file == 'coap':
+        data = [row[44:] for row in data]
+    elif output_file == 'dns':
+        data = [row[28:] for row in data]
+    elif output_file == 'gh0st':
+        data = [row[54:] for row in data]
+    elif output_file == 'mqtt':
+        data = [row[68:] for row in data]
+    elif output_file == 'nbns10000':
+        data = [row[46:] for row in data]
+    elif output_file == 'qq5':
+        data = [row[42:] for row in data]
+    elif output_file == 'snmp':
+        data = [row[44:] for row in data]
+    elif output_file == 'stun':
+        data = [row[42:] for row in data]
+    elif output_file == 'tls':
+        data = [row[54:] for row in data]
+    elif output_file == 'Websoc_all':
+        data = [row[54:] for row in data]
+    elif output_file == 'rtp':
+        data = [row[42:] for row in data]
     return data
 
 

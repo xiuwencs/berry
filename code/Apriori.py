@@ -312,7 +312,7 @@ def print_2D_list(data):
 def apriori_find(data):
     minsup,minconfi=(0.5, 1)
     start = time.time()
-    print(data[0])
+    # print(data[0])
     Sup_satisfy_item = sup_satisfy_item(data, minsup)  # 获得满足支持度的频繁项集，第一项为频繁1项集合的集合，以此类推。
 
     all_frequent = Find_rule_apriori(data, Sup_satisfy_item, minsup, minconfi)
